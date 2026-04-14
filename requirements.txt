@@ -1,0 +1,22 @@
+# System Health Monitoring - Requirements
+# ===============================
+# Intelligent Desktop System Observability and Anomaly Response Tool
+# Final Year BCA Project
+
+# Core dependencies
+PySide6>=6.10.0
+psutil>=5.9.0
+
+# ML-based anomaly detection (unsupervised learning)
+scikit-learn>=1.3.0
+
+# Graph visualization (NEW FEATURE)
+pyqtgraph>=0.12.0  # Lightweight, high-performance graphs for real-time metrics
+matplotlib>=3.5.0  # Fallback for graph visualization if pyqtgraph unavailable
+
+# Note: These are the required dependencies for this project.
+# PySide6 includes all Qt components needed for the GUI.
+# scikit-learn provides Isolation Forest for ML-based anomaly detection.
+# pyqtgraph provides fast, real-time graph visualization.
+# matplotlib serves as a fallback for graph display.
+

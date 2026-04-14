@@ -1,0 +1,12 @@
+Metric,Value,Unit
+CPU Usage,15.3,%
+CPU Cores,12,cores
+CPU Average,5.8,%
+Memory Usage,75.7,%
+Memory Used,0,MB
+Memory Total,0,MB
+Disk Usage,42.7,%
+Process Count,154,processes
+Health Score,65.2,/100
+Health Status,Good,status
+Timestamp,2026-03-05 00:36:35,datetime

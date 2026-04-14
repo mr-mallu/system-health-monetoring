@@ -1,0 +1,70 @@
+======================================================================
+SYSTEM HEALTH MONITORING - DIAGNOSTIC REPORT
+======================================================================
+
+Report Generated: 2026-03-05 00:36:35
+
+1. SYSTEM METRICS
+----------------------------------------------------------------------
+CPU Usage:        15.3%
+CPU Cores:        12
+CPU Average:      5.8%
+
+Memory Usage:     75.7%
+Memory (Used/Total): 0 MB / 0 MB
+
+Disk Usage:       42.7%
+Running Processes: 154
+
+2. SYSTEM HEALTH
+----------------------------------------------------------------------
+Health Score: 65.2/100
+Health Status: Good
+
+3. DETECTED ANOMALIES
+----------------------------------------------------------------------
+Total Anomalies: 1
+
+Anomaly #1:
+  Type:        High Memory Process
+  Severity:    High
+  Description: Process 'Code.exe' (PID: 4156) using high memory: 1325.7 MB
+
+
+4. SYSTEM SUGGESTIONS
+----------------------------------------------------------------------
+Total Suggestions: 1
+
+
+High Priority:
+  1. High Memory Usage
+     Memory is running at 75.7%. Consider closing unused applications.
+
+5. DAILY STATISTICS
+----------------------------------------------------------------------
+Peak CPU Usage:    0.0%
+Peak Memory Usage: 0.0%
+Average CPU:       0.0%
+Average Memory:    0.0%
+Alert Count:       0
+Avg Health Score:  100.0
+
+6. TOP PROCESSES
+----------------------------------------------------------------------
+Top CPU Processes:
+  1. PID_188 - 0.0% CPU (PID: 188)
+  2. msedge.exe - 0.0% CPU (PID: 228)
+  3. winlogon.exe - 0.0% CPU (PID: 1252)
+  4. LsaIso.exe - 0.0% CPU (PID: 1340)
+  5. Code.exe - 0.0% CPU (PID: 1424)
+
+Top Memory Processes:
+  1. Code.exe - 1326 MB (8.3%)
+  2. Code.exe - 408 MB (2.5%)
+  3. python3.11.exe - 358 MB (2.2%)
+  4. msedge.exe - 323 MB (2.0%)
+  5. explorer.exe - 315 MB (2.0%)
+
+======================================================================
+End of Report
+======================================================================
