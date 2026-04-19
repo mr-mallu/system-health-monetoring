@@ -10,6 +10,7 @@ from datetime import datetime
 from PySide6.QtWidgets import QMessageBox
 from PySide6.QtCore import QTimer
 import config
+from monitor.process_monitor import ProcessMonitor
 
 
 class AlertManager:
@@ -276,7 +277,11 @@ class AlertManager:
         return alert
     
     def _show_desktop_notification(self, alert: dict):
-        """Show desktop notification using QMessageBox."""
+        """Show desktop notification using non-modal QMessageBox.
+        
+        Uses .show() instead of .exec() so the main UI thread keeps
+        processing background metrics and remains fully responsive.
+        """
         severity = alert['severity']
         
         # Determine icon and title based on severity
@@ -299,34 +304,62 @@ class AlertManager:
             ml_status = "ML Confirmed" if alert['ml_confirmed'] else "ML Normal"
             description += f"\n({ml_status})"
         
-        # Show message box
+        # Build non-modal message box
         msg_box = QMessageBox(self.parent)
         msg_box.setIcon(icon)
         msg_box.setWindowTitle(title)
         msg_box.setText(f"<b>{alert['type']}</b>")
         msg_box.setInformativeText(description)
+        msg_box.setModal(False)  # Non-blocking so UI stays responsive
         
         # Add buttons
         log_button = msg_box.addButton("Log Incident", QMessageBox.ActionRole)
         dismiss_button = msg_box.addButton("Dismiss", QMessageBox.RejectRole)
         
         # If there's a process involved, add terminate option
+        terminate_button = None
         if alert.get('process'):
             terminate_button = msg_box.addButton("Simulate Terminate", QMessageBox.ActionRole)
         
-        msg_box.exec()
+        # --- Async click handler ---------------------------------------------------
+        def _handle_click(clicked_button):
+            """Process user's button choice without blocking."""
+            if clicked_button == log_button:
+                alert['acknowledged'] = True
+                self.logger.info(f"Alert {alert['id']} acknowledged and logged by user")
+            elif clicked_button == dismiss_button:
+                # Suppress this process for 30 minutes to prevent popup spam
+                if alert.get('process'):
+                    self.suppress_process(alert['process'])
+                self.logger.info(f"Alert {alert['id']} dismissed by user")
+            elif terminate_button is not None and clicked_button == terminate_button:
+                # Actually simulate termination through ProcessMonitor
+                process_info = alert.get('process', {})
+                pid = process_info.get('pid')
+                if pid:
+                    pm = ProcessMonitor()
+                    result = pm.terminate_process(pid, simulate=True)
+                    self.logger.info(
+                        f"Alert {alert['id']} – Simulate Terminate: {result['message']}"
+                    )
+                    # Suppress future alerts for this process
+                    self.suppress_process(process_info)
+                else:
+                    self.logger.info(f"Alert {alert['id']} – Terminate requested but no PID available")
+            # Clean up the message box
+            msg_box.deleteLater()
         
-        # Handle button clicks
-        clicked_button = msg_box.clickedButton()
+        msg_box.buttonClicked.connect(_handle_click)
         
-        if clicked_button == log_button:
-            alert['acknowledged'] = True
-            self.logger.info(f"Alert {alert['id']} acknowledged and logged by user")
-        elif clicked_button == dismiss_button:
-            # Suppress this process for 30 minutes to prevent popup spam
-            if alert.get('process'):
-                self.suppress_process(alert['process'])
-            self.logger.info(f"Alert {alert['id']} dismissed by user")
+        # Keep a reference so the dialog isn't garbage-collected
+        if not hasattr(self, '_active_popups'):
+            self._active_popups = []
+        self._active_popups.append(msg_box)
+        msg_box.destroyed.connect(lambda: self._active_popups.remove(msg_box)
+                                   if msg_box in self._active_popups else None)
+        
+        # Show non-modally — the UI keeps running
+        msg_box.show()
         
         return alert
     

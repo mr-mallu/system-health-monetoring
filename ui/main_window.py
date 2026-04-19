@@ -40,6 +40,7 @@ from ui.settings_view import SettingsView
 from ui.history_view import HistoryView
 from ui.suggestions_view import SuggestionsView
 from ui.graph_dashboard import GraphDashboard
+from ui.notes_view import NotesView
 
 
 class MainWindow(QMainWindow):
@@ -245,6 +246,7 @@ class MainWindow(QMainWindow):
         self.create_alerts_tab()
         self.create_history_tab()
         self.create_suggestions_tab()
+        self.create_notes_tab()
         self.create_settings_tab()
         
         # Connect tab change for lazy loading
@@ -450,7 +452,13 @@ class MainWindow(QMainWindow):
         self.process_table.setHorizontalHeaderLabels([
             "PID", "Process Name", "CPU %", "Memory (MB)", "Memory %", "Uptime (hrs)"
         ])
-        self.process_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        self.process_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.process_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        self.process_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        self.process_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeToContents)
+        self.process_table.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeToContents)
+        self.process_table.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeToContents)
+        self.process_table.horizontalHeader().setStretchLastSection(True)
         self.process_table.setSelectionBehavior(QTableWidget.SelectRows)
         self.process_table.setSelectionMode(QTableWidget.SingleSelection)
         self.process_table.itemSelectionChanged.connect(self.process_selection_changed)
@@ -485,7 +493,11 @@ class MainWindow(QMainWindow):
         self.anomaly_table.setHorizontalHeaderLabels([
             "Time", "Type", "Severity", "Description"
         ])
-        self.anomaly_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
+        self.anomaly_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.anomaly_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        self.anomaly_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.anomaly_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        self.anomaly_table.horizontalHeader().setStretchLastSection(True)
         
         layout.addWidget(self.anomaly_table)
         
@@ -514,7 +526,12 @@ class MainWindow(QMainWindow):
         self.alert_table.setHorizontalHeaderLabels([
             "Time", "Type", "Severity", "Description", "Acknowledged"
         ])
-        self.alert_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
+        self.alert_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.alert_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        self.alert_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.alert_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        self.alert_table.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeToContents)
+        self.alert_table.horizontalHeader().setStretchLastSection(True)
         
         layout.addWidget(self.alert_table)
         
@@ -529,6 +546,11 @@ class MainWindow(QMainWindow):
         """Create suggestions tab."""
         self.suggestions_view = SuggestionsView()
         self.tabs.addTab(self.suggestions_view, "Suggestions")
+        
+    def create_notes_tab(self):
+        """Create admin diagnostic notes tab."""
+        self.notes_view = NotesView()
+        self.tabs.addTab(self.notes_view, "Admin Notes")
     
     def create_settings_tab(self):
         """Create settings tab."""
@@ -672,24 +694,37 @@ class MainWindow(QMainWindow):
             print(f"Daily summary refresh failed: {e}")
 
     def generate_system_report(self):
-        """Generate TXT/CSV system report from current state."""
+        """Generate a professional system report with CSS graphs and DB alert history."""
         try:
             daily_stats = self.daily_summary.calculate_daily_stats()
+
+            # --- Collect graph history data (text/tabular, no screenshots) ---
+            graph_data = None
+            if hasattr(self, 'overview_graph_dashboard'):
+                graph_data = self.overview_graph_dashboard.export_graph_data()
+
+            # --- Fetch recent alerts from database ---
+            recent_alerts = []
+            try:
+                recent_alerts = self.db.get_alerts(limit=15)
+            except Exception as alert_err:
+                print(f"Failed to fetch alerts for report: {alert_err}")
+
             report_info = self.report_generator.generate_report(
                 metrics=self.current_metrics,
                 anomalies=self.anomalies,
                 suggestions=self.current_suggestions,
                 daily_summary=daily_stats,
-                include_processes=True
+                include_processes=True,
+                graph_data=graph_data,
+                alerts=recent_alerts
             )
 
-            filename = os.path.basename(report_info['txt_path'])
+            pdf_path = report_info.get('pdf_path', '')
+            filename = os.path.basename(pdf_path)
             self.report_status_label.setText(f"Report generated: {filename}")
-            QMessageBox.information(
-                self,
-                "System Report Generated",
-                f"TXT: {report_info['txt_path']}\nCSV: {report_info['csv_path']}"
-            )
+            msg = f"PDF Report Created:\n{pdf_path}"
+            QMessageBox.information(self, "System Report Generated", msg)
         except Exception as e:
             self.report_status_label.setText("Report generation failed")
             QMessageBox.warning(self, "Report Error", f"Failed to generate report: {e}")
@@ -830,10 +865,15 @@ class MainWindow(QMainWindow):
         self.update_alert_display()
     
     def closeEvent(self, event):
-        """Handle window close event."""
-        # Stop monitoring
+        """Handle window close event – gracefully stops the background thread."""
+        # Stop monitoring and wait for the thread to finish
         if hasattr(self, 'monitor_worker') and self.monitor_worker:
             self.monitor_worker.stop()
+            # Wait up to 5 seconds for the thread to finish its current loop
+            if not self.monitor_worker.wait(5000):
+                # Force terminate if it still hasn't stopped
+                self.monitor_worker.terminate()
+                self.monitor_worker.wait(1000)
         
         # Log shutdown
         if hasattr(self, 'alert_manager'):

@@ -1,0 +1,70 @@
+======================================================================
+SYSTEM HEALTH MONITORING - DIAGNOSTIC REPORT
+======================================================================
+
+Report Generated: 2026-04-14 11:37:36
+
+1. SYSTEM METRICS
+----------------------------------------------------------------------
+CPU Usage:        10.4%
+CPU Cores:        8
+CPU Average:      2.8%
+
+Memory Usage:     86.6%
+Memory (Used/Total): 0 MB / 0 MB
+
+Disk Usage:       71.6%
+Running Processes: 139
+
+2. SYSTEM HEALTH
+----------------------------------------------------------------------
+Health Score: 63.0/100
+Health Status: Good
+
+3. DETECTED ANOMALIES
+----------------------------------------------------------------------
+Total Anomalies: 1
+
+Anomaly #1:
+  Type:        Sustained High Memory
+  Severity:    Medium
+  Description: Memory usage has been above 70.0% for 10 seconds (avg: 87.4%)
+
+
+4. SYSTEM SUGGESTIONS
+----------------------------------------------------------------------
+No suggestions at this time.
+
+5. DAILY STATISTICS
+----------------------------------------------------------------------
+Peak CPU Usage:    18.0%
+Peak Memory Usage: 95.5%
+Average CPU:       2.2%
+Average Memory:    89.4%
+Alert Count:       42
+Avg Health Score:  72.5
+
+6. TOP PROCESSES
+----------------------------------------------------------------------
+Top CPU Processes:
+  1. python.exe - 10.6% CPU (PID: 12940)
+  2. elevation_service.exe - 0.0% CPU (PID: 164)
+  3. chrome.exe - 0.0% CPU (PID: 1408)
+  4. RtkAudUService64.exe - 0.0% CPU (PID: 1856)
+  5. IntelCpHDCPSvc.exe - 0.0% CPU (PID: 1888)
+
+Top Memory Processes:
+  1. Antigravity.exe - 415 MB (5.1%)
+  2. pyrefly.exe - 374 MB (4.6%)
+  3. firefox.exe - 305 MB (3.8%)
+  4. explorer.exe - 288 MB (3.6%)
+  5. python.exe - 264 MB (3.3%)
+
+7. SYSTEM GRAPH SNAPSHOT
+----------------------------------------------------------------------
+Graph image saved at: E:\project\system-health-monetoring\data\reports\system_report_20260414_113736_graph.png
+(Open the PNG file to view CPU/Memory/Health trends)
+
+======================================================================
+End of Report
+======================================================================

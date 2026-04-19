@@ -323,3 +323,66 @@ class StartupChecker:
             )
         
         return tips
+    
+    def disable_startup_program(self, program: dict) -> dict:
+        """
+        Disable a startup program.
+        For Registry sources: deletes the value from the Run key (HKCU only).
+        For Startup Folder sources: renames the shortcut with a .disabled suffix.
+        
+        Args:
+            program: Program dictionary from get_startup_programs()
+            
+        Returns:
+            dict with 'success' (bool) and 'message' (str)
+        """
+        result = {'success': False, 'message': ''}
+        name = program.get('name', '')
+        source = program.get('source', '')
+        location = program.get('location', '')
+        
+        try:
+            if source == 'Registry' and 'HKCU' in location:
+                # Remove from HKCU registry
+                subkey = r"Software\Microsoft\Windows\CurrentVersion\Run"
+                key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, subkey, 0,
+                                     winreg.KEY_SET_VALUE)
+                winreg.DeleteValue(key, name)
+                winreg.CloseKey(key)
+                result['success'] = True
+                result['message'] = f"Removed '{name}' from startup registry."
+                # Update local state
+                program['enabled'] = False
+            
+            elif source == 'Startup Folder':
+                command = program.get('command', '')
+                if os.path.exists(command):
+                    disabled_path = command + '.disabled'
+                    os.rename(command, disabled_path)
+                    result['success'] = True
+                    result['message'] = f"Disabled '{name}' by renaming shortcut."
+                    program['enabled'] = False
+                else:
+                    result['message'] = f"Shortcut not found: {command}"
+            
+            elif source == 'Registry' and 'HKLM' in location:
+                result['message'] = (
+                    f"Cannot disable '{name}': Machine-level startup items "
+                    "require administrator privileges. Use Task Manager instead."
+                )
+            
+            elif source == 'Scheduled Tasks':
+                result['message'] = (
+                    f"Cannot disable '{name}': Use Task Scheduler to manage "
+                    "scheduled tasks."
+                )
+            
+            else:
+                result['message'] = f"Unsupported source type: {source}"
+        
+        except PermissionError:
+            result['message'] = f"Permission denied trying to disable '{name}'."
+        except Exception as e:
+            result['message'] = f"Error disabling '{name}': {str(e)}"
+        
+        return result

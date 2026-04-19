@@ -1,6 +1,7 @@
 """
 Suggestions View Module
 Provides startup program and cache cleanup recommendations.
+Features disable buttons for startup programs.
 """
 
 from PySide6.QtWidgets import (
@@ -83,7 +84,14 @@ class SuggestionsView(QWidget):
     
     def init_ui(self):
         """Initialize the user interface."""
-        layout = QVBoxLayout(self)
+        main_layout = QVBoxLayout(self)
+        
+        self.main_scroll = QScrollArea()
+        self.main_scroll.setWidgetResizable(True)
+        self.main_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        
+        scroll_content = QWidget()
+        layout = QVBoxLayout(scroll_content)
         
         # Title
         title = QLabel("💡 Suggestions")
@@ -104,11 +112,14 @@ class SuggestionsView(QWidget):
         self.live_suggestions_table.setHorizontalHeaderLabels([
             "Severity", "Title", "Message"
         ])
+        self.live_suggestions_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.live_suggestions_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.live_suggestions_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
-        self.live_suggestions_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
+        self.live_suggestions_table.horizontalHeader().setStretchLastSection(True)
         self.live_suggestions_table.setAlternatingRowColors(True)
-        self.live_suggestions_table.setMaximumHeight(220)
+        self.live_suggestions_table.setMinimumHeight(200)
+        self.live_suggestions_table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.live_suggestions_table.setWordWrap(True)
         live_layout.addWidget(self.live_suggestions_table)
 
         layout.addWidget(live_group)
@@ -145,6 +156,10 @@ class SuggestionsView(QWidget):
         self.content_layout.addWidget(self.cache_content)
         
         layout.addWidget(self.content_stack)
+        
+        layout.addStretch()
+        self.main_scroll.setWidget(scroll_content)
+        main_layout.addWidget(self.main_scroll)
     
     def create_startup_content(self) -> QWidget:
         """Create startup programs content."""
@@ -178,22 +193,33 @@ class SuggestionsView(QWidget):
             "Startup programs slow down your computer's boot time.",
             "High impact programs use more resources at startup.",
             "System required programs should not be disabled.",
-            "You can manage startup programs in Task Manager."
+            "You can manage startup programs in Task Manager.",
+            "Disabling cloud sync apps (OneDrive, Dropbox) saves boot time — start them manually when needed.",
+            "Browser extensions that run at startup can consume significant memory.",
+            "Keep antivirus and security software enabled at startup for protection.",
         ]
         
         for tip in tips:
             tip_label = QLabel(f"• {tip}")
+            tip_label.setWordWrap(True)
             tips_layout.addWidget(tip_label)
         
         layout.addWidget(tips_group)
         
-        # Results table
+        # Results table (6 columns with Action)
         self.startup_table = QTableWidget()
-        self.startup_table.setColumnCount(5)
+        self.startup_table.setColumnCount(6)
         self.startup_table.setHorizontalHeaderLabels([
-            "Program", "Impact", "Source", "Location", "Recommendation"
+            "Program", "Impact", "Source", "Location", "Recommendation", "Action"
         ])
         self.startup_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.startup_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.startup_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        self.startup_table.horizontalHeader().setSectionResizeMode(5, QHeaderView.Fixed)
+        self.startup_table.setColumnWidth(5, 120)
+        self.startup_table.horizontalHeader().setStretchLastSection(False)
+        self.startup_table.setMinimumHeight(600)
+        self.startup_table.verticalHeader().setDefaultSectionSize(45)
         self.startup_table.setAlternatingRowColors(True)
         
         layout.addWidget(self.startup_table)
@@ -254,7 +280,13 @@ class SuggestionsView(QWidget):
         self.cache_table.setHorizontalHeaderLabels([
             "Location", "Category", "Size", "Files", "Safe to Clean"
         ])
-        self.cache_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.cache_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.cache_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.cache_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        self.cache_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeToContents)
+        self.cache_table.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeToContents)
+        self.cache_table.horizontalHeader().setStretchLastSection(False)
+        self.cache_table.setMinimumHeight(600)
         self.cache_table.setAlternatingRowColors(True)
         
         layout.addWidget(self.cache_table)
@@ -309,7 +341,7 @@ class SuggestionsView(QWidget):
             for row, program in enumerate(self.startup_programs):
                 self.startup_table.setItem(row, 0, QTableWidgetItem(program['name']))
                 
-                # Impact
+                # Impact with color
                 impact_item = QTableWidgetItem(program['impact'])
                 if program['impact'] == 'High':
                     impact_item.setBackground(QColor(255, 200, 200))
@@ -322,6 +354,29 @@ class SuggestionsView(QWidget):
                 self.startup_table.setItem(row, 2, QTableWidgetItem(program['source']))
                 self.startup_table.setItem(row, 3, QTableWidgetItem(program['location'][:50]))
                 self.startup_table.setItem(row, 4, QTableWidgetItem(program['recommendation']))
+                
+                # Action column: Disable button (or System label)
+                if 'System required' not in program.get('recommendation', ''):
+                    btn_widget = QWidget()
+                    btn_layout = QHBoxLayout(btn_widget)
+                    btn_layout.setContentsMargins(4, 4, 4, 4)
+                    
+                    disable_btn = QPushButton("Disable")
+                    disable_btn.setFixedSize(90, 32)
+                    disable_btn.setStyleSheet(
+                        "QPushButton { background-color: #e74c3c; color: white; "
+                        "border-radius: 4px; padding: 4px 10px; font-weight: bold; }"
+                        "QPushButton:hover { background-color: #c0392b; }"
+                    )
+                    disable_btn.clicked.connect(lambda checked, r=row: self.disable_startup_item(r))
+                    
+                    btn_layout.addWidget(disable_btn)
+                    btn_layout.addStretch()
+                    self.startup_table.setCellWidget(row, 5, btn_widget)
+                else:
+                    label = QLabel("System")
+                    label.setAlignment(Qt.AlignCenter)
+                    self.startup_table.setCellWidget(row, 5, label)
             
             self.startup_progress.setText(f"Scan complete! Found {len(self.startup_programs)} programs.")
     
@@ -407,6 +462,41 @@ class SuggestionsView(QWidget):
                 f"Space that would be freed: {result['total_formatted']}\n\n"
                 f"{result['message']}"
             )
+    
+    def disable_startup_item(self, row: int):
+        """Disable a startup program from the table."""
+        if row < 0 or row >= len(self.startup_programs):
+            return
+        
+        program = self.startup_programs[row]
+        name = program.get('name', 'Unknown')
+        
+        reply = QMessageBox.question(
+            self,
+            "Disable Startup Program",
+            f"Are you sure you want to disable '{name}' from startup?\n\n"
+            f"Source: {program.get('source', '')}\n"
+            f"Impact: {program.get('impact', '')}",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            result = self.startup_checker.disable_startup_program(program)
+            
+            if result['success']:
+                QMessageBox.information(self, "Startup Disabled", result['message'])
+                # Update the table row to show it's disabled
+                btn = self.startup_table.cellWidget(row, 5)
+                if btn and isinstance(btn, QPushButton):
+                    btn.setText("Disabled")
+                    btn.setEnabled(False)
+                    btn.setStyleSheet(
+                        "QPushButton { background-color: #95a5a6; color: white; "
+                        "border-radius: 4px; padding: 4px 10px; }"
+                    )
+            else:
+                QMessageBox.warning(self, "Cannot Disable", result['message'])
     
     def refresh(self):
         """Refresh the suggestions."""

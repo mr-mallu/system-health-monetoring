@@ -1,0 +1,80 @@
+======================================================================
+SYSTEM HEALTH MONITORING - DIAGNOSTIC REPORT
+======================================================================
+
+Report Generated: 2026-04-14 19:56:51
+
+1. SYSTEM METRICS
+----------------------------------------------------------------------
+CPU Usage:        0.0%
+CPU Cores:        8
+CPU Average:      6.3%
+
+Memory Usage:     89.4%
+Memory (Used/Total): 0 MB / 0 MB
+
+Disk Usage:       68.6%
+Running Processes: 98
+
+2. SYSTEM HEALTH
+----------------------------------------------------------------------
+Health Score: 59.7/100
+Health Status: Fair
+
+3. DETECTED ANOMALIES
+----------------------------------------------------------------------
+Total Anomalies: 3
+
+Anomaly #1:
+  Type:        Sustained High Memory
+  Severity:    Medium
+  Description: Memory usage has been above 70.0% for 10 seconds (avg: 89.9%)
+
+Anomaly #2:
+  Type:        High Memory Process
+  Severity:    High
+  Description: Process 'firefox.exe' (PID: 17208) using high memory: 684.5 MB
+
+Anomaly #3:
+  Type:        High Memory Process
+  Severity:    High
+  Description: Process 'pyrefly.exe' (PID: 14440) using high memory: 530.9 MB
+
+
+4. SYSTEM SUGGESTIONS
+----------------------------------------------------------------------
+No suggestions at this time.
+
+5. DAILY STATISTICS
+----------------------------------------------------------------------
+Peak CPU Usage:    18.0%
+Peak Memory Usage: 95.5%
+Average CPU:       2.4%
+Average Memory:    88.7%
+Alert Count:       84
+Avg Health Score:  72.7
+
+6. TOP PROCESSES
+----------------------------------------------------------------------
+Top CPU Processes:
+  1. python.exe - 10.6% CPU (PID: 15380)
+  2. Widgets.exe - 0.0% CPU (PID: 1124)
+  3. powershell.exe - 0.0% CPU (PID: 1552)
+  4. firefox.exe - 0.0% CPU (PID: 1648)
+  5. SecurityHealthSystray.exe - 0.0% CPU (PID: 1676)
+
+Top Memory Processes:
+  1. firefox.exe - 684 MB (8.4%)
+  2. pyrefly.exe - 531 MB (6.6%)
+  3. explorer.exe - 342 MB (4.2%)
+  4. Antigravity.exe - 322 MB (4.0%)
+  5. firefox.exe - 308 MB (3.8%)
+
+7. SYSTEM GRAPH SNAPSHOT
+----------------------------------------------------------------------
+Graph image saved at: E:\project\system-health-monetoring\data\reports\system_report_20260414_195651_graph.png
+(Open the PNG file to view CPU/Memory/Health trends)
+
+======================================================================
+End of Report
+======================================================================

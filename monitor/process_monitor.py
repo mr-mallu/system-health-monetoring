@@ -6,7 +6,7 @@ FIXED:
 - System Idle Process (PID 0) is now properly filtered
 - Critical system processes are excluded from alerts
 - Proper exception handling for AccessDenied and ZombieProcess
-- CPU values are clamped to 0-100%
+- CPU values use cached process_iter() attrs (no more 0.0 readings)
 """
 
 import psutil
@@ -56,6 +56,7 @@ class ProcessMonitor:
         """
         Get list of all running processes with their details.
         FIXED: Now filters out PID 0 and system processes.
+        FIXED: Uses cached cpu_percent from process_iter attrs.
         
         Returns:
             list: List of dictionaries containing process information
@@ -74,7 +75,7 @@ class ProcessMonitor:
                 # FIX: Handle blank/empty process names
                 if not name or name.strip() == '':
                     name = f"PID_{pid}"
-
+                
                 # FIX: Skip known system processes
                 if self._is_system_process(name):
                     continue
@@ -86,13 +87,13 @@ class ProcessMonitor:
                 except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                     memory_mb = 0
                 
-                # FIX: Get CPU percent properly - clamp to 0-100
-                # psutil.cpu_percent() returns per-CPU usage, so we need to normalize
-                # Use non-blocking call (uses cached value from previous call)
+                # FIX: Use cached cpu_percent from process_iter() attrs list.
+                # process_iter() with 'cpu_percent' in the attrs offers a
+                # pre-computed, non-blocking value based on the delta since the
+                # previous call.  Calling proc.cpu_percent() again resets the
+                # measurement window and returns 0.0 for most processes.
                 try:
-                    cpu_percent = proc.cpu_percent()
-                    # Normalize to 0-100 by dividing by number of CPUs
-                    # This gives the actual percentage of total system CPU
+                    cpu_percent = pinfo.get('cpu_percent', 0) or 0
                     num_cpus = psutil.cpu_count() or 1
                     cpu_percent = cpu_percent / num_cpus
                     cpu_percent = min(100.0, max(0.0, cpu_percent))
@@ -168,7 +169,6 @@ class ProcessMonitor:
             list: List of processes exceeding CPU threshold
         """
         processes = self.get_all_processes()
-        # Filter out System Idle Process (PID 0) which always shows high CPU due to per-core measurement
         return [p for p in processes if p['cpu_percent'] >= self.high_cpu_threshold and p['pid'] != 0]
     
     def get_high_memory_processes(self):

@@ -28,6 +28,31 @@ QUICK START
    - Command Line: `python main.py`
 
 
+PROJECT OVERVIEW
+================
+
+Project title:
+  System Health Monitoring System
+
+What it does:
+  Monitors CPU, memory, disk, and process activity in real time.
+  Detects abnormal behavior, logs alerts, and presents system health in a desktop dashboard.
+
+Why it exists:
+  - Reduce the need for manual system checks
+  - Give early warning before failures or slowdowns
+  - Make multiple system parameters easier to understand in one place
+
+Core modules:
+  - Data collection
+  - Monitoring and anomaly detection
+  - Alert management
+  - User interface and reporting
+
+Detailed project write-up:
+  docs/PROJECT_OVERVIEW.md
+
+
 FEATURES
 ========
 

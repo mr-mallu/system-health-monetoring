@@ -111,6 +111,16 @@ class Database:
             )
         """)
         
+        # Admin Notes Table (Custom Diagnostics Notes CRUD)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS admin_notes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                target_date TEXT NOT NULL,
+                note_text TEXT NOT NULL
+            )
+        """)
+        
         # Create indexes for better query performance
         cursor.execute("""
             CREATE INDEX IF NOT EXISTS idx_metrics_timestamp 
@@ -166,10 +176,14 @@ class Database:
             int: Row ID of inserted record
         """
         cursor = self.conn.cursor()
+        # FIX: Explicitly store local timestamp instead of relying on
+        # CURRENT_TIMESTAMP (which is UTC).  The history view filters by
+        # datetime.now() (local time), so they must be in the same timezone.
+        local_ts = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         cursor.execute("""
-            INSERT INTO system_metrics (cpu_usage, memory_usage, disk_usage, process_count)
-            VALUES (?, ?, ?, ?)
-        """, (cpu_usage, memory_usage, disk_usage, process_count))
+            INSERT INTO system_metrics (timestamp, cpu_usage, memory_usage, disk_usage, process_count)
+            VALUES (?, ?, ?, ?, ?)
+        """, (local_ts, cpu_usage, memory_usage, disk_usage, process_count))
         self.conn.commit()
         return cursor.lastrowid
     
@@ -192,12 +206,9 @@ class Database:
             # Convert ISO format 'YYYY-MM-DDTHH:MM:SS' to SQLite datetime format
             # Also support receiving datetime objects
             if isinstance(start_time, datetime):
-                # It's already a datetime object, convert to ISO string
                 start_time = start_time.isoformat()
             
             # Convert ISO format to SQLite datetime format for comparison
-            # Python's isoformat() returns 'YYYY-MM-DDTHH:MM:SS' (with T)
-            # SQLite expects 'YYYY-MM-DD HH:MM:SS' (with space)
             start_time_formatted = start_time.replace('T', ' ')
             # If it has microseconds, truncate to seconds
             if '.' in start_time_formatted:
@@ -285,10 +296,12 @@ class Database:
             int: Row ID of inserted record
         """
         cursor = self.conn.cursor()
+        # Also store local timestamp for alerts
+        local_ts = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         cursor.execute("""
-            INSERT INTO alerts (severity, message, source)
-            VALUES (?, ?, ?)
-        """, (severity, message, source))
+            INSERT INTO alerts (timestamp, severity, message, source)
+            VALUES (?, ?, ?, ?)
+        """, (local_ts, severity, message, source))
         self.conn.commit()
         return cursor.lastrowid
     
@@ -494,7 +507,7 @@ class Database:
             int: Number of records inserted
         """
         cursor = self.conn.cursor()
-        timestamp = datetime.now().isoformat()
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         
         data = [
             (timestamp, p['pid'], p['name'], p['cpu_percent'], p['memory_mb'], p['memory_percent'])
@@ -598,6 +611,42 @@ class Database:
         
         return stats
     
+    # ==================== Admin Notes Operations (CRUD) ====================
+    
+    def insert_note(self, target_date: str, note_text: str) -> int:
+        """Create an admin note."""
+        cursor = self.conn.cursor()
+        cursor.execute("""
+            INSERT INTO admin_notes (target_date, note_text)
+            VALUES (?, ?)
+        """, (target_date, note_text))
+        self.conn.commit()
+        return cursor.lastrowid
+        
+    def get_all_notes(self) -> List[Dict]:
+        """Read all admin notes."""
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT * FROM admin_notes ORDER BY timestamp DESC")
+        return [dict(row) for row in cursor.fetchall()]
+        
+    def update_note(self, note_id: int, new_text: str) -> bool:
+        """Update an existing admin note."""
+        cursor = self.conn.cursor()
+        cursor.execute("""
+            UPDATE admin_notes
+            SET note_text = ?
+            WHERE id = ?
+        """, (new_text, note_id))
+        self.conn.commit()
+        return cursor.rowcount > 0
+        
+    def delete_note(self, note_id: int) -> bool:
+        """Delete an admin note."""
+        cursor = self.conn.cursor()
+        cursor.execute("DELETE FROM admin_notes WHERE id = ?", (note_id,))
+        self.conn.commit()
+        return cursor.rowcount > 0
+    
     def close(self):
         """Close database connection."""
         if self.conn:
@@ -617,4 +666,3 @@ def get_database() -> Database:
         Database instance
     """
     return db
-
