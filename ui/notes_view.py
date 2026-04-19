@@ -153,7 +153,7 @@ class NotesView(QWidget):
         if ok and new_text.strip():
             self.db.update_note(note_id, new_text.strip())
             self.load_notes()
-            QMessageBox.information(self, "Success", "Note updated effectively.")
+            QMessageBox.information(self, "Success", "Note updated successfully.")
             
     def delete_selected_note(self):
         """Delete operation."""

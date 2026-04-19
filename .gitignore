@@ -1,14 +1,43 @@
+# Python cache
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 
-# Local runtime data
-logs/
-tests/test_output.txt
-tests/verify_output.txt
-
-# Environment-specific files
+# Virtual environments
 .env
 .venv/
 venv/
+env/
+
+# Runtime data & databases
+data/*.db
+data/*.db-journal
+logs/
+
+# Generated reports & temp
+data/reports/
+data/reports_test/
+temp_reports/
+*.pdf
+
+# Test output
+tests/test_output.txt
+tests/verify_output.txt
+
+# IDE & editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS junk
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/

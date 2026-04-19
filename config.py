@@ -5,6 +5,11 @@ Contains all configuration settings and thresholds for the monitoring system.
 
 import os
 
+# Application identity
+APP_NAME = "System Health Monitoring"
+VERSION = "2.0.0"
+AUTHOR = "Mallikarjun"
+
 # Project paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "data")
@@ -19,7 +24,6 @@ os.makedirs(DATA_DIR, exist_ok=True)
 os.makedirs(LOGS_DIR, exist_ok=True)
 
 # Refresh interval for metrics (in seconds)
-# Changed from 1 to 3 seconds for better performance
 REFRESH_INTERVAL = 3
 
 # CPU thresholds (percentage)
@@ -65,4 +69,3 @@ ML_RETRAIN_INTERVAL = 300  # Seconds between retraining attempts
 ALERT_COOLDOWN_DEFAULT = 300  # 5 minutes default cooldown
 ALERT_COOLDOWN_MIN = 60  # 1 minute minimum
 ALERT_COOLDOWN_MAX = 1800  # 30 minutes maximum
-

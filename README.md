@@ -1,335 +1,207 @@
-"""
-SYSTEM OBSERVER
-===============
+# 🖥️ System Health Monitoring
 
-Intelligent Desktop System Observability and Anomaly Response Tool
-Final Year BCA Project
+**Intelligent Desktop System Observability and Anomaly Response Tool**
 
-Advanced system monitoring with 6 professional features:
-✓ Performance cause analysis
-✓ Smart suggestions
-✓ Diagnostic reports
-✓ Daily statistics
-✓ Real-time graphs
-✓ Startup optimization
-"""
+> A real-time desktop application that monitors CPU, memory, disk, and process activity — detects anomalies using rule-based and ML algorithms — and presents actionable insights through a professional dashboard.
 
-QUICK START
-===========
+| | |
+|---|---|
+| **Version** | 2.0.0 |
+| **Author** | Mallikarjun |
+| **Project** | Final Year BCA Project, 2026 |
+| **Platform** | Windows (Python 3.8+) |
+| **UI** | PySide6 (Qt 6) |
 
-1. Install:
-   pip install -r requirements.txt
+---
 
-2. Integrate new features:
-   Read: docs/QUICK_START.md
+## ✨ Features
 
-3. Run the project:
-   - Windows: double-click `run_app.bat`
-   - Command Line: `python main.py`
+### Core Monitoring
+- **Real-time CPU, Memory & Disk tracking** with configurable thresholds
+- **Process monitoring** — top CPU/memory consumers, uptime, simulated termination
+- **Rule-based anomaly detection** — threshold breaches, spike detection, sustained high usage
+- **ML-based anomaly detection** — Isolation Forest (unsupervised learning) for pattern-based alerts
+- **Alert management** — popup notifications, severity levels, cooldown control, acknowledgement
 
+### Advanced Features
+| # | Feature | Description |
+|---|---------|-------------|
+| 1 | **Performance Cause Explanation** | Identifies *which* process is causing slowdowns and explains why |
+| 2 | **Smart Suggestions Engine** | Context-aware recommendations based on current system state |
+| 3 | **Diagnostic Report Generator** | Professional PDF reports with metrics, graphs, anomalies & alerts |
+| 4 | **Daily System Summary** | Peak/average statistics, alert counts, and health trends |
+| 5 | **Real-time Graph Dashboard** | Live CPU, Memory & Health Score graphs (pyqtgraph / matplotlib) |
+| 6 | **Startup Impact Analyzer** | Identifies startup programs by impact level; supports disabling |
 
-PROJECT OVERVIEW
-================
+### Additional Capabilities
+- 🎨 **Dark / Light theme** with premium toggle switches in settings
+- 📝 **Admin Notes** — CRUD diagnostic notes stored in SQLite
+- 🧹 **Cache Cleanup Scanner** — identifies safe-to-clean temp files
+- 📊 **History View** — browse past metrics with time-range filters
+- 📈 **Health Score** — weighted composite score (CPU + Memory + Anomalies)
 
-Project title:
-  System Health Monitoring System
+---
 
-What it does:
-  Monitors CPU, memory, disk, and process activity in real time.
-  Detects abnormal behavior, logs alerts, and presents system health in a desktop dashboard.
+## 📁 Project Structure
 
-Why it exists:
-  - Reduce the need for manual system checks
-  - Give early warning before failures or slowdowns
-  - Make multiple system parameters easier to understand in one place
-
-Core modules:
-  - Data collection
-  - Monitoring and anomaly detection
-  - Alert management
-  - User interface and reporting
-
-Detailed project write-up:
-  docs/PROJECT_OVERVIEW.md
-
-
-FEATURES
-========
-
-BUILT-IN (Existing):
-├─ CPU, Memory, Disk Monitoring
-├─ Process Monitoring
-├─ Rule-based Anomaly Detection
-├─ ML-based Anomaly Detection
-├─ Alert Management
-├─ Dark/Light Theme
-└─ Multiple UI Tabs
-
-NEW FEATURES (Extension):
-├─ 1. Performance Cause Explanation
-├─ 2. Smart Suggestions Engine
-├─ 3. Diagnostic Report Generator
-├─ 4. Daily System Summary
-├─ 5. Real-time Graph Dashboard
-└─ 6. Startup Impact Analyzer (enhanced)
-
-
-PROJECT STRUCTURE
-=================
-
+```
 system-health-monitoring/
-├── analysis/
-│   ├── performance_analyzer.py ........... NEW
-│   ├── suggestions_engine.py ............ NEW
-│   ├── anomaly_detector.py
-│   └── ml_detector.py
+├── main.py .......................... Application entry point
+├── config.py ........................ Configuration & thresholds
+├── requirements.txt ................. Python dependencies
+├── run_app.bat ...................... Quick launcher (Windows)
 │
-├── backend/
-│   ├── report_generator.py .............. NEW
-│   ├── daily_summary.py ................. NEW
-│   ├── monitor_worker.py
-│   ├── database.py
-│   ├── cache_cleaner.py
-│   └── startup_checker.py
-│
-├── ui/
-│   ├── main_window.py ................... (+ enhancements)
-│   ├── suggestions_view.py .............. (+ enhancements)
-│   ├── graph_dashboard.py ............... NEW
-│   ├── history_view.py
-│   └── settings_view.py
-│
-├── monitor/
+├── monitor/ ......................... Data collection layer
 │   ├── cpu_monitor.py
 │   ├── memory_monitor.py
 │   ├── disk_monitor.py
 │   └── process_monitor.py
 │
-├── alerts/
-│   └── alert_manager.py
+├── analysis/ ........................ Intelligence layer
+│   ├── anomaly_detector.py .......... Rule-based detection
+│   ├── ml_detector.py ............... Isolation Forest ML
+│   ├── performance_analyzer.py ...... Root-cause analysis
+│   └── suggestions_engine.py ....... Smart recommendations
 │
-├── docs/
-│   ├── QUICK_START.md ................... START HERE
-│   ├── FEATURES.md ...................... Feature reference
-│   ├── CODE_SNIPPETS.md ................. Integration examples
-│   ├── TROUBLESHOOTING.md ............... Troubleshooting
-│   └── guides/ .......................... Additional guides
+├── backend/ ......................... Services layer
+│   ├── database.py .................. SQLite operations (singleton)
+│   ├── monitor_worker.py ............ Background QThread worker
+│   ├── report_generator.py .......... PDF report generation
+│   ├── daily_summary.py ............. 24-hour statistics
+│   ├── startup_checker.py ........... Startup program analyzer
+│   └── cache_cleaner.py ............. Temp file scanner
+│
+├── ui/ .............................. Presentation layer
+│   ├── main_window.py ............... Main GUI window
+│   ├── graph_dashboard.py ........... Live metric graphs
+│   ├── suggestions_view.py .......... Startup & cache UI
+│   ├── history_view.py .............. Historical data browser
+│   ├── settings_view.py ............. Settings with toggle switches
+│   └── notes_view.py ................ Admin notes CRUD
+│
+├── alerts/
+│   └── alert_manager.py ............. Desktop alert system
+│
+├── themes/
+│   ├── dark.qss ..................... Dark theme stylesheet
+│   └── light.qss ................... Light theme stylesheet
 │
 ├── data/
-│   ├── reports/ ......................... Generated reports
-│   └── system_observer.db ............... SQLite database
+│   ├── system_observer.db ........... SQLite database (auto-created)
+│   └── reports/ ..................... Generated PDF reports
 │
-├── tests/
-│   ├── test_*.py ........................ Unit tests
-│   └── verify_app.py .................... Verification script
+├── logs/
+│   └── system.log ................... Rotating application log
 │
-├── main.py ............................. Application entry point
-├── config.py ........................... Configuration
-├── requirements.txt ..................... Dependencies
-└── README.md ........................... This file
+├── docs/ ............................ Documentation
+│   ├── PROJECT_OVERVIEW.md
+│   ├── FEATURES.md
+│   ├── CODE_SNIPPETS.md
+│   ├── QUICK_START.md
+│   ├── TROUBLESHOOTING.md
+│   ├── TODO.md
+│   └── UPGRADE_SUMMARY.md
+│
+├── tests/ ........................... Test suite
+│   ├── test_imports.py
+│   ├── test_db.py
+│   ├── test_filter.py
+│   └── verify_app.py
+│
+└── scripts/
+    └── run_app.bat .................. Launcher script
+```
 
+---
 
-INTEGRATION GUIDE
-=================
+## 🚀 Quick Start
 
-Three simple steps to activate all 6 features:
+### Prerequisites
+- **Python 3.8+** (tested on Python 3.14)
+- **Windows OS** (uses Windows-specific process/startup APIs)
 
-Step 1: Install Dependencies
-  pip install -r requirements.txt
+### Installation
 
-Step 2: Modify ui/main_window.py
-  - Add imports (5 lines)
-  - Initialize modules (4 lines)
-  - Add new tab for graphs (2 lines)
-  - Add new method for metrics processing (40 lines)
-  - Connect signal (1 line)
+```bash
+# 1. Clone or download the project
+cd system-health-monitoring
 
-Step 3: Modify ui/suggestions_view.py
-  - Add imports (2 lines)
-  - Initialize modules (2 lines)
-  - Add display methods (30 lines)
-  - Add button handlers (20 lines)
+# 2. Install dependencies
+pip install -r requirements.txt
+```
 
-Total time: 30-45 minutes
+### Running the Application
 
-Detailed instructions: See docs/QUICK_START.md
+```bash
+# Option A: Command line
+python main.py
 
+# Option B: Double-click launcher (Windows)
+run_app.bat
+```
 
-REQUIREMENTS
-============
+---
 
-Core:
-  - Python 3.8+
-  - PySide6 (GUI)
-  - psutil (monitoring)
-  - scikit-learn (ML)
+## 🛠️ Technology Stack
 
-NEW (for graphs):
-  - pyqtgraph>=0.12.0 (primary, optional)
-  - matplotlib>=3.5.0 (fallback, optional)
+| Technology | Purpose |
+|------------|---------|
+| **Python 3** | Core language |
+| **PySide6** | Desktop GUI (Qt 6 bindings) |
+| **psutil** | System metrics collection |
+| **scikit-learn** | ML anomaly detection (Isolation Forest) |
+| **pyqtgraph** | High-performance live graphs |
+| **matplotlib** | Fallback graph rendering |
+| **SQLite** | Local database for metrics, alerts, settings, notes |
 
-All included in requirements.txt
+---
 
+## 📋 Requirements
 
-USAGE
-=====
+```
+PySide6>=6.10.0
+psutil>=5.9.0
+scikit-learn>=1.3.0
+pyqtgraph>=0.12.0
+matplotlib>=3.5.0
+```
 
-1. Start the application:
-   - Windows: double-click `run_app.bat`
-   - Command Line: `python main.py`
+---
 
-2. Monitor system metrics in Overview tab
+## 🔧 Configuration
 
-3. View smart suggestions in Suggestions tab
+All thresholds and settings are centralized in `config.py`:
 
-4. Watch real-time graphs in Graphs tab (NEW)
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `REFRESH_INTERVAL` | 3s | Metrics polling interval |
+| `CPU_WARNING_THRESHOLD` | 70% | CPU warning level |
+| `CPU_CRITICAL_THRESHOLD` | 90% | CPU critical level |
+| `MEMORY_WARNING_THRESHOLD` | 70% | RAM warning level |
+| `DISK_WARNING_THRESHOLD` | 80% | Disk warning level |
+| `ALERT_COOLDOWN_DEFAULT` | 300s | Minimum gap between repeated alerts |
 
-5. Generate diagnostic report: Click "Generate Report" (NEW)
+Settings can also be modified live through the **Settings** tab in the application.
 
+---
 
-TESTING
-=======
+## 🐛 Troubleshooting
 
-Run all features demonstration:
-  python example_features.py
+| Problem | Solution |
+|---------|----------|
+| `ModuleNotFoundError` | Run `pip install -r requirements.txt` |
+| Graphs not displaying | Install `pyqtgraph` or `matplotlib` |
+| Reports failing | Ensure `data/reports/` directory is writable |
+| High CPU from the app itself | Increase `REFRESH_INTERVAL` in config.py |
 
-This shows all 6 features in action without needing the full UI.
+See [TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for more.
 
+---
 
-DOCUMENTATION
-==============
+## 📄 License
 
-Start with:
-  docs/QUICK_START.md ............... Integration guide (10 min read)
+This project is an academic submission for the BCA Final Year Project, 2026.
 
-Then read as needed:
-  docs/FEATURES.md .................. Feature reference
-  docs/CODE_SNIPPETS.md ............ Integration examples
-  docs/TROUBLESHOOTING.md .......... Problem solving
+---
 
-Advanced:
-  docs/guides/ ...................... Additional guides
-
-
-TROUBLESHOOTING
-===============
-
-Module not found errors?
-  → Check files are in correct directories
-  → Run: pip install -r requirements.txt
-
-Graphs not displaying?
-  → Application needs to run in Qt environment
-  → Optional: install pyqtgraph
-  → Fallback to text display if unavailable
-
-Reports not generating?
-  → Check data/reports/ directory exists
-  → Ensure write permissions
-
-Suggestions not appearing?
-  → Check monitor worker is running
-  → System might be running normally (no issues)
-
-See docs/TROUBLESHOOTING.md for more
-
-
-PROJECT CREDITS
-===============
-
-System Observer: Intelligent system monitoring for Windows
-Final Year BCA Project
-
-Features:
-✓ CPU/Memory/Disk monitoring
-✓ Process tracking
-✓ Anomaly detection (rule-based and ML)
-✓ Alert management
-✓ Performance analysis (NEW)
-✓ Smart suggestions (NEW)
-✓ Diagnostic reports (NEW)
-✓ Daily statistics (NEW)
-✓ Graph visualization (NEW)
-✓ Professional UI
-
-
-KEY FEATURES SUMMARY
-====================
-
-Performance Cause Explanation:
-  "System slow? Chrome is using 52% CPU - try closing it."
-  Smart analysis of which process causes slowdown.
-
-Smart Suggestions:
-  "High memory usage detected. Consider closing unused applications."
-  Context-aware recommendations based on current state.
-
-Diagnostic Reports:
-  Export complete system diagnostics in TXT or CSV format.
-  Includes metrics, anomalies, suggestions, and process info.
-
-Daily Statistics:
-  Track peak and average metrics, alert counts, and health trends.
-  Identify patterns and recurring issues.
-
-Real-time Graphs:
-  Visual monitoring of CPU, memory, and health score trends.
-  Makes system behavior easy to understand.
-
-Startup Analyzer:
-  Optimize boot time by identifying unnecessary startup programs.
-  Classify by impact level: High, Medium, Low.
-
-
-TECHNICAL NOTES
-===============
-
-Database:
-  SQLite database at data/system_observer.db
-  No schema changes needed for new features
-  Uses existing tables for all computations
-
-Threading:
-  All new features non-blocking
-  Suitable for background monitoring thread
-  Database access is thread-safe
-
-Performance:
-  Combined overhead <1% on monitoring loop
-  Memory usage ~10MB for all features
-  No impact on response time or smoothness
-
-
-CODE QUALITY
-============
-
-✓ Production-ready code
-✓ Comprehensive error handling
-✓ Type hints throughout
-✓ Well-documented with docstrings
-✓ Follows existing project patterns
-✓ No breaking changes
-✓ Backward compatible
-
-
-SUPPORT & HELP
-==============
-
-Having issues?
-  1. Check docs/QUICK_START.md
-  2. Read docs/TROUBLESHOOTING.md
-  3. Check module docstrings
-  4. Run python example_features.py to test
-
-Want to understand a specific feature?
-  → Read docs/FEATURES.md
-
-Want integration code examples?
-  → See docs/CODE_SNIPPETS.md
-
-═══════════════════════════════════════════════════════════════════════
-
-Ready to integrate? Start with: docs/QUICK_START.md
-
-Happy monitoring! 🚀
-"""
+*Built with ❤️ by Mallikarjun*

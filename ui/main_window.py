@@ -12,7 +12,8 @@ from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
     QTabWidget, QTableWidget, QTableWidgetItem, QLabel,
     QPushButton, QHeaderView, QFrame, QGridLayout,
-    QGroupBox, QScrollArea, QApplication, QMessageBox
+    QGroupBox, QScrollArea, QApplication, QMessageBox,
+    QStatusBar
 )
 from PySide6.QtCore import QTimer, Qt
 from PySide6.QtGui import QColor, QFont
@@ -224,7 +225,7 @@ class MainWindow(QMainWindow):
     
     def init_ui(self):
         """Initialize the user interface."""
-        self.setWindowTitle("System Health Monitoring - Desktop Monitoring Tool")
+        self.setWindowTitle(f"{config.APP_NAME} v{config.VERSION}")
         self.setGeometry(100, 100, 1200, 800)
         
         central_widget = QWidget()
@@ -254,6 +255,11 @@ class MainWindow(QMainWindow):
         
         # Connect settings changes
         self.settings_view.settings_changed.connect(self.on_settings_changed)
+        
+        # Status bar
+        self.status_bar = QStatusBar()
+        self.setStatusBar(self.status_bar)
+        self.status_bar.showMessage(f"{config.APP_NAME} v{config.VERSION} — Monitoring Active")
     
     def create_header(self, parent_layout):
         """Create header with health score."""

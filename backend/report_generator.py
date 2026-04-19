@@ -8,6 +8,7 @@ and robust HTML layout designed explicitly for PySide6's QTextDocument.
 import os
 from datetime import datetime
 from typing import List, Dict, Optional
+import config
 
 
 PROJECT_OVERVIEW = {
@@ -490,7 +491,18 @@ class ReportGenerator:
             </table>
         """
 
-        html += """
+        html += f"""
+            <br><br>
+            <table width="100%" cellpadding="10" cellspacing="0" bgcolor="#f1f5f9">
+                <tr>
+                    <td align="center">
+                        <font color="#94a3b8" size="2">
+                            {config.APP_NAME} v{config.VERSION} &mdash; Report generated on {timestamp}<br>
+                            Author: {config.AUTHOR} &bull; BCA Final Year Project 2026
+                        </font>
+                    </td>
+                </tr>
+            </table>
         </body>
         </html>
         """
