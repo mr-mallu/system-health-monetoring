@@ -4,22 +4,19 @@ Creates the main GUI window for the System Health Monitoring application.
 Enhanced with background threading for better UI performance.
 """
 
-import sys
 import os
+import logging
 from datetime import datetime
 
 from PySide6.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
+    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QTabWidget, QTableWidget, QTableWidgetItem, QLabel,
-    QPushButton, QHeaderView, QFrame, QGridLayout,
+    QPushButton, QHeaderView, QGridLayout,
     QGroupBox, QScrollArea, QApplication, QMessageBox,
     QStatusBar
 )
 from PySide6.QtCore import QTimer, Qt
 from PySide6.QtGui import QColor, QFont
-
-# Add project root to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import config
 from monitor.cpu_monitor import CPUMonitor
@@ -36,7 +33,6 @@ from backend.monitor_worker import get_monitor_worker
 from backend.report_generator import ReportGenerator
 from backend.daily_summary import DailySummary
 
-# Import new views
 from ui.settings_view import SettingsView
 from ui.history_view import HistoryView
 from ui.suggestions_view import SuggestionsView
@@ -47,6 +43,8 @@ from ui.notes_view import NotesView
 class MainWindow(QMainWindow):
     """Main application window for System Health Monitoring."""
     
+    logger = logging.getLogger(__name__)
+
     def __init__(self):
         """Initialize the main window."""
         super().__init__()
@@ -87,7 +85,7 @@ class MainWindow(QMainWindow):
             'processes': {'count': 0, 'top_cpu': [], 'top_memory': [], 'summary': {}},
             'health_score': 100.0,
             'health_status': 'Excellent',
-            'anomalies': []  # FIX: Initialize anomalies list
+            'anomalies': []
         }
         self.anomalies = []
         self.current_impact_analysis = {}
@@ -130,7 +128,7 @@ class MainWindow(QMainWindow):
             settings = self.db.get_all_settings()
             self.on_settings_changed(settings)
         except Exception as e:
-            print(f"Error loading settings: {e}")
+            self.logger.error("Error loading settings: %s", e)
     
     def _setup_background_monitoring(self):
         """Setup background monitoring with QThread."""
@@ -145,14 +143,12 @@ class MainWindow(QMainWindow):
         
         # Start monitoring
         self.monitor_worker.start()
-        
-        print("Background monitoring started")
+
+        self.logger.info("Background monitoring started")
     
     def on_metrics_updated(self, metrics):
         """Handle metrics update from background worker."""
-        # Update current metrics
         self.current_metrics = metrics
-        # FIX: Get anomalies from metrics
         self.anomalies = metrics.get('anomalies', [])
 
         # Analyze root cause and suggestions from latest process metrics
@@ -204,7 +200,7 @@ class MainWindow(QMainWindow):
     
     def on_monitor_error(self, error_msg):
         """Handle monitoring error."""
-        print(f"Monitor error: {error_msg}")
+        self.logger.error("Monitor error: %s", error_msg)
     
     def apply_theme(self):
         """Apply dark theme to the application."""
@@ -220,9 +216,9 @@ class MainWindow(QMainWindow):
                 app = QApplication.instance()
                 if app:
                     app.setStyleSheet(theme_content)
-            except Exception as e:
-                print(f"Failed to load theme: {e}")
-    
+            except (FileNotFoundError, IOError) as e:
+                self.logger.warning("Failed to load theme: %s", e)
+
     def init_ui(self):
         """Initialize the user interface."""
         self.setWindowTitle(f"{config.APP_NAME} v{config.VERSION}")
@@ -435,6 +431,7 @@ class MainWindow(QMainWindow):
         scroll.setWidget(scroll_content)
         tab_layout.addWidget(scroll)
         self.tabs.addTab(tab, "System Overview")
+
     def create_processes_tab(self):
         """Create processes tab with table."""
         tab = QWidget()
@@ -478,7 +475,7 @@ class MainWindow(QMainWindow):
         tab = QWidget()
         layout = QVBoxLayout(tab)
         
-        # FIX: Add refresh button for anomalies
+        # Refresh button for anomalies
         button_layout = QHBoxLayout()
         refresh_btn = QPushButton("Refresh Anomalies")
         refresh_btn.clicked.connect(self.update_anomaly_table)
@@ -697,7 +694,7 @@ class MainWindow(QMainWindow):
             self.daily_peak_memory_label.setText("N/A")
             self.daily_alert_count_label.setText("N/A")
             self.daily_avg_health_label.setText("N/A")
-            print(f"Daily summary refresh failed: {e}")
+            self.logger.warning("Daily summary refresh failed: %s", e)
 
     def generate_system_report(self):
         """Generate a professional system report with CSS graphs and DB alert history."""
@@ -714,7 +711,7 @@ class MainWindow(QMainWindow):
             try:
                 recent_alerts = self.db.get_alerts(limit=15)
             except Exception as alert_err:
-                print(f"Failed to fetch alerts for report: {alert_err}")
+                self.logger.warning("Failed to fetch alerts for report: %s", alert_err)
 
             report_info = self.report_generator.generate_report(
                 metrics=self.current_metrics,
@@ -801,7 +798,6 @@ class MainWindow(QMainWindow):
     
     def update_anomaly_table(self):
         """Update anomaly table with current anomalies."""
-        # FIX: Use self.anomalies directly which is updated by on_metrics_updated
         anomalies = self.anomalies if self.anomalies else self.current_metrics.get('anomalies', [])
         
         self.anomaly_count_label.setText(f"Active Anomalies: {len(anomalies)}")
@@ -896,7 +892,6 @@ class MainWindow(QMainWindow):
         if hasattr(self, 'monitor_worker') and self.monitor_worker:
             self.monitor_worker.update_settings(settings)
         
-        # FIX: Apply theme immediately without restart
         if 'theme' in settings:
             self._apply_theme(settings['theme'].lower())
     
@@ -914,8 +909,5 @@ class MainWindow(QMainWindow):
                 app = QApplication.instance()
                 if app:
                     app.setStyleSheet(theme_content)
-            except Exception as e:
-                print(f"Failed to load theme: {e}")
-
-
-
+            except (FileNotFoundError, IOError) as e:
+                self.logger.warning("Failed to load theme '%s': %s", theme_name, e)

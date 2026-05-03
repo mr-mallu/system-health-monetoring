@@ -7,14 +7,10 @@ Features premium toggle switches instead of plain checkboxes.
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QGroupBox,
     QLabel, QPushButton, QSpinBox,
-    QComboBox, QScrollArea, QMessageBox, QFormLayout
+    QComboBox, QScrollArea, QMessageBox
 )
 from PySide6.QtCore import Signal, Qt, QSize, Property, QPropertyAnimation, QEasingCurve, QRect
 from PySide6.QtGui import QFont, QPainter, QColor, QPen
-
-import sys
-import os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import config
 from backend.database import get_database
@@ -345,6 +341,3 @@ class SettingsView(QWidget):
     
     def get_settings(self) -> dict:
         return self.settings.copy()
-    
-    def apply_theme(self, theme_name: str):
-        pass

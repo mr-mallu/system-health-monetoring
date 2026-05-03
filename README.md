@@ -48,8 +48,10 @@
 system-health-monitoring/
 ├── main.py .......................... Application entry point
 ├── config.py ........................ Configuration & thresholds
+├── constants.py ..................... Shared constants (process lists)
 ├── requirements.txt ................. Python dependencies
 ├── run_app.bat ...................... Quick launcher (Windows)
+├── .env.example ..................... Environment variable template
 │
 ├── monitor/ ......................... Data collection layer
 │   ├── cpu_monitor.py
@@ -109,7 +111,7 @@ system-health-monitoring/
 │   └── verify_app.py
 │
 └── scripts/
-    └── run_app.bat .................. Launcher script
+    └── generate_report_docx.py ...... Academic report generator
 ```
 
 ---
@@ -128,6 +130,9 @@ cd system-health-monitoring
 
 # 2. Install dependencies
 pip install -r requirements.txt
+
+# 3. (Optional) Copy environment template
+copy .env.example .env
 ```
 
 ### Running the Application
@@ -166,6 +171,24 @@ pyqtgraph>=0.12.0
 matplotlib>=3.5.0
 ```
 
+> **Note:** `scikit-learn` is optional — the app degrades gracefully to rule-based-only detection if it is not installed.
+
+---
+
+## 🗄️ Database Schema
+
+The application uses SQLite with the following tables:
+
+| Table | Purpose |
+|-------|---------|
+| `system_metrics` | Timestamped CPU, memory, disk, and process count readings |
+| `alerts` | Alert history with severity and acknowledgement status |
+| `user_settings` | Key-value settings persistence |
+| `process_history` | Historical per-process resource usage |
+| `admin_notes` | User diagnostic notes with target dates |
+
+See [docs/](docs/) for detailed schema documentation.
+
 ---
 
 ## 🔧 Configuration
@@ -182,6 +205,8 @@ All thresholds and settings are centralized in `config.py`:
 | `ALERT_COOLDOWN_DEFAULT` | 300s | Minimum gap between repeated alerts |
 
 Settings can also be modified live through the **Settings** tab in the application.
+
+Environment variables can override defaults — see `.env.example`.
 
 ---
 

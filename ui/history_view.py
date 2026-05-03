@@ -3,19 +3,16 @@ History View Module
 Provides interface for viewing historical system data.
 """
 
+import logging
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QGroupBox,
     QLabel, QPushButton, QTableWidget, QTableWidgetItem,
-    QHeaderView, QComboBox, QDateTimeEdit, QLineEdit,
-    QGridLayout, QFrame
+    QHeaderView, QComboBox,
+    QGridLayout
 )
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFont
 from datetime import datetime, timedelta
-import os
-import sys
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from backend.database import get_database
 
@@ -64,14 +61,12 @@ class HistoryView(QWidget):
         filter_layout.addWidget(QLabel("Time Range:"))
         
         self.time_range_combo = QComboBox()
-        # FIX: Use addItem(text, userData) properly - value stored in userData
         self.time_range_combo.addItem("Last 1 Hour", "1h")
         self.time_range_combo.addItem("Last 6 Hours", "6h")
         self.time_range_combo.addItem("Last 24 Hours", "24h")
         self.time_range_combo.addItem("Last 7 Days", "7d")
         self.time_range_combo.addItem("Last 30 Days", "30d")
         self.time_range_combo.setCurrentIndex(0)
-        # FIX: Connect to currentIndexChanged for proper index-based handling
         self.time_range_combo.currentIndexChanged.connect(self.on_time_range_index_changed)
         filter_layout.addWidget(self.time_range_combo)
         
@@ -144,7 +139,6 @@ class HistoryView(QWidget):
     
     def on_time_range_index_changed(self, index):
         """Handle time range selection change by index."""
-        # FIX: Get value from combo box userData (set in addItem)
         item_value = self.time_range_combo.itemData(index)
         
         if item_value:
@@ -181,7 +175,7 @@ class HistoryView(QWidget):
         try:
             start_time = self.get_start_time()
             
-            # Get metrics history - FIX: pass start_time correctly
+            # Get metrics history
             data = self.db.get_metrics_history(limit=1000, start_time=start_time)
             
             # Update table
@@ -215,7 +209,7 @@ class HistoryView(QWidget):
             # Update statistics
             self.update_statistics(data)
             
-            # Update footer - FIX: Format timestamp for display
+            # Format timestamp for display
             display_time = datetime.fromisoformat(start_time).strftime("%Y-%m-%d %H:%M")
             self.footer_label.setText(f"Showing {len(data)} records since {display_time}")
             
@@ -223,7 +217,7 @@ class HistoryView(QWidget):
             self._data_loaded = True
             
         except Exception as e:
-            print(f"Error loading history data: {e}")
+            logging.getLogger(__name__).error("Error loading history data: %s", e)
             self.footer_label.setText(f"Error loading data: {str(e)}")
     
     def update_statistics(self, data):

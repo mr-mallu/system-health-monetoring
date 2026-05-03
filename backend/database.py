@@ -6,9 +6,12 @@ Provides modular and reusable database operations.
 
 import sqlite3
 import os
+import logging
 from datetime import datetime
 from typing import List, Dict, Optional, Any
 import config
+
+logger = logging.getLogger(__name__)
 
 
 class Database:
@@ -56,7 +59,7 @@ class Database:
             # Enable foreign keys
             self.conn.execute("PRAGMA foreign_keys = ON")
         except sqlite3.Error as e:
-            print(f"Database connection error: {e}")
+            logger.error("Database connection error: %s", e)
             raise
     
     def _create_tables(self):
@@ -176,9 +179,7 @@ class Database:
             int: Row ID of inserted record
         """
         cursor = self.conn.cursor()
-        # FIX: Explicitly store local timestamp instead of relying on
-        # CURRENT_TIMESTAMP (which is UTC).  The history view filters by
-        # datetime.now() (local time), so they must be in the same timezone.
+        # Store local timestamps so history filters (which use datetime.now()) match
         local_ts = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         cursor.execute("""
             INSERT INTO system_metrics (timestamp, cpu_usage, memory_usage, disk_usage, process_count)
@@ -202,9 +203,7 @@ class Database:
         cursor = self.conn.cursor()
         
         if start_time:
-            # FIX: Use proper datetime comparison
-            # Convert ISO format 'YYYY-MM-DDTHH:MM:SS' to SQLite datetime format
-            # Also support receiving datetime objects
+            # Convert ISO format to SQLite datetime format for comparison
             if isinstance(start_time, datetime):
                 start_time = start_time.isoformat()
             

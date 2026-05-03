@@ -10,11 +10,6 @@ from PySide6.QtWidgets import (
     QHeaderView, QTextEdit, QDateEdit, QMessageBox, QInputDialog
 )
 from PySide6.QtCore import Qt, QDate
-from datetime import datetime
-import sys
-import os
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from backend.database import get_database
 

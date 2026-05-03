@@ -27,30 +27,30 @@ class AlertManager:
             parent: Parent widget for message boxes
         """
         self.parent = parent
-        self.alert_history = []  # Store all alerts
-        self.pending_alerts = []  # Alerts waiting for user response
-        
-        # Set up logging
+        self.alert_history = []
+        self.pending_alerts = []
+
         self._setup_logging()
-        
-        # Alert cooldown - 5 minutes default to prevent popup spam
+
+        # Cooldown — prevent popup spam (default 5 minutes)
         self.alert_cooldown = config.ALERT_COOLDOWN_DEFAULT
         self.last_alert_time = {}
-        
-        # Track last alert content to prevent duplicate notifications
         self.last_alert_content = {}
-        
-        # Process-level suppression - 30 minutes to prevent same process popup spam
-        self.suppression_window = 1800  # 30 minutes in seconds
-        self.suppressed_processes = {}  # {key: "process_name_PID", expiry_time: timestamp}
-        
-        # Enable/disable flags (controlled by settings)
+
+        # Per-process suppression (30 minutes after dismiss)
+        self.suppression_window = 1800
+        self.suppressed_processes = {}
+
+        # Feature flags (controlled by settings tab)
         self.enable_popup_alerts = True
         self.enable_tray_notifications = True
         self.enable_ml_detection = True
-        
-        # Reference to database for storing alerts
+
+        # Database handle (set via set_database)
         self.db = None
+
+        # Active popup references — prevents garbage collection
+        self._active_popups = []
     
     def _setup_logging(self):
         """Set up logging to file."""
@@ -352,11 +352,11 @@ class AlertManager:
         msg_box.buttonClicked.connect(_handle_click)
         
         # Keep a reference so the dialog isn't garbage-collected
-        if not hasattr(self, '_active_popups'):
-            self._active_popups = []
         self._active_popups.append(msg_box)
-        msg_box.destroyed.connect(lambda: self._active_popups.remove(msg_box)
-                                   if msg_box in self._active_popups else None)
+        msg_box.destroyed.connect(
+            lambda: self._active_popups.remove(msg_box)
+            if msg_box in self._active_popups else None
+        )
         
         # Show non-modally — the UI keeps running
         msg_box.show()

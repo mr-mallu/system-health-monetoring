@@ -7,16 +7,12 @@ Features disable buttons for startup programs.
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QGroupBox,
     QLabel, QPushButton, QTableWidget, QTableWidgetItem,
-    QHeaderView, QComboBox, QMessageBox, QProgressBar,
-    QGridLayout, QScrollArea, QFrame
+    QHeaderView, QComboBox, QMessageBox,
+    QGridLayout, QScrollArea
 )
-from PySide6.QtCore import Qt, Signal, QThread
+from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtGui import QFont, QColor
 from datetime import datetime
-import os
-import sys
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from backend.startup_checker import StartupChecker
 from backend.cache_cleaner import CacheCleaner
@@ -487,14 +483,16 @@ class SuggestionsView(QWidget):
             if result['success']:
                 QMessageBox.information(self, "Startup Disabled", result['message'])
                 # Update the table row to show it's disabled
-                btn = self.startup_table.cellWidget(row, 5)
-                if btn and isinstance(btn, QPushButton):
-                    btn.setText("Disabled")
-                    btn.setEnabled(False)
-                    btn.setStyleSheet(
-                        "QPushButton { background-color: #95a5a6; color: white; "
-                        "border-radius: 4px; padding: 4px 10px; }"
-                    )
+                cell_widget = self.startup_table.cellWidget(row, 5)
+                if cell_widget:
+                    btn = cell_widget.findChild(QPushButton)
+                    if btn:
+                        btn.setText("Disabled")
+                        btn.setEnabled(False)
+                        btn.setStyleSheet(
+                            "QPushButton { background-color: #95a5a6; color: white; "
+                            "border-radius: 4px; padding: 4px 10px; }"
+                        )
             else:
                 QMessageBox.warning(self, "Cannot Disable", result['message'])
     
